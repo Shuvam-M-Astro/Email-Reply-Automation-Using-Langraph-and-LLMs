@@ -49,7 +49,7 @@ A LangGraph-powered agentic AI system that generates automatic replies to emails
       │
       ▼
 [logs/reply_log.csv]
-
+```
 ## ⚙️ Configuration
 
 Update your `config.yaml`:
@@ -57,7 +57,7 @@ Update your `config.yaml`:
 ```yaml
 openai_api_key: "your-openai-key"
 model_temperature: 0.3
-
+```
 ## ▶️ How to Run
 
 1.  **Clone the repo**
@@ -65,13 +65,13 @@ model_temperature: 0.3
 3.  **Install dependencies**:
 ```bash
 pip install -r requirements.txt
-
+```
 4.  Place a `.txt` email in `test_emails/`
 5.  Run the main script:
 
 ```bash
 python main.py
-
+```
 
 ## ✅ Output
 
@@ -93,7 +93,7 @@ Can we move our meeting from 3pm to 4:30pm tomorrow?
 
 Thanks,
 Alex
-
+```
 **Generated Reply:**
 
 ```vbnet
@@ -103,3 +103,4 @@ Sure, we can reschedule the meeting to 4:30pm tomorrow. I've updated the calenda
 
 Best regards,  
 Support Team
+```
