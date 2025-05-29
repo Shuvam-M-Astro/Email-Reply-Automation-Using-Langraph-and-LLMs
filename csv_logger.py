@@ -10,5 +10,11 @@ def log_to_csv(email_data, reply):
     with open(log_path, mode='a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         if not file_exists:
-            writer.writerow(["Timestamp", "Subject", "Email Body", "Generated Reply"])
-        writer.writerow([datetime.now(), email_data["subject"], email_data["email_body"], reply])
+            writer.writerow(["Timestamp", "Subject", "Email Body", "Category", "Generated Reply"])
+        writer.writerow([
+            datetime.now(),
+            email_data.get("subject", "Unknown"),
+            email_data["email_body"],
+            email_data.get("category", "Unknown"),
+            reply
+        ])
