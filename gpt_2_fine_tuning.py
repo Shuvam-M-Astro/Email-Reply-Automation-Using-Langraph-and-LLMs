@@ -105,7 +105,7 @@ class EmailResponseTrainer:
         weight_decay: float = 0.01,
         logging_steps: int = 10,
         eval_steps: int = 100,
-        save_steps: int = 500,
+        save_steps: int = 100,  # Match with eval_steps
     ):
         self.model_name = model_name
         self.output_dir = output_dir
@@ -118,14 +118,11 @@ class EmailResponseTrainer:
             weight_decay=weight_decay,
             logging_steps=logging_steps,
             logging_dir='./logs',
-            evaluation_strategy="steps",
-            eval_steps=eval_steps,
             save_steps=save_steps,
             save_total_limit=2,
             learning_rate=learning_rate,
-            load_best_model_at_end=True,
-            metric_for_best_model="eval_loss",
-            report_to="wandb"  # Enable wandb logging
+            do_train=True,
+            do_eval=True
         )
         
         # Initialize tokenizer and model
@@ -165,18 +162,12 @@ class EmailResponseTrainer:
         )
         
         try:
-            # Initialize wandb
-            wandb.init(project="email-response-generator", name="gpt2-fine-tuning")
-            
             # Train the model
             trainer.train()
             
             # Save the model and tokenizer
             self.model.save_pretrained(self.output_dir)
             self.tokenizer.save_pretrained(self.output_dir)
-            
-            # Close wandb
-            wandb.finish()
             
         except Exception as e:
             logging.error(f"Error during training: {str(e)}")
@@ -232,9 +223,6 @@ class EmailResponseGenerator:
             return "Error generating response. Please try again."
 
 def main():
-    # Initialize wandb
-    wandb.login()
-    
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device: {device}")
