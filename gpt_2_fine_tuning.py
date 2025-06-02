@@ -15,6 +15,9 @@ from sklearn.model_selection import train_test_split
 import logging
 from typing import Dict, List, Union
 import wandb  # for experiment tracking
+from torch.quantization import quantize_dynamic
+from torch.ao.quantization import get_default_qconfig
+from torch.ao.quantization.quantize_fx import prepare_fx, convert_fx
 
 # Configure logging
 logging.basicConfig(
@@ -174,11 +177,37 @@ class EmailResponseTrainer:
             raise
 
 class EmailResponseGenerator:
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, use_quantization: bool = False):
         self.tokenizer = GPT2Tokenizer.from_pretrained(model_path)
         self.model = GPT2LMHeadModel.from_pretrained(model_path)
         self.model.eval()
         
+        if use_quantization:
+            self.quantize_model()
+            
+    def quantize_model(self):
+        """
+        Applies dynamic quantization to the model to reduce memory usage and increase inference speed.
+        Dynamic quantization converts weights to int8 precision during inference.
+        """
+        try:
+            # Ensure model is in eval mode
+            self.model.eval()
+            
+            # Apply dynamic quantization to the model
+            # This quantizes the weights to int8 while keeping activations in fp32
+            self.model = torch.quantization.quantize_dynamic(
+                self.model,
+                {torch.nn.Linear},  # Quantize only linear layers
+                dtype=torch.qint8
+            )
+            
+            logging.info("Model successfully quantized")
+            
+        except Exception as e:
+            logging.error(f"Error during model quantization: {str(e)}")
+            logging.warning("Falling back to non-quantized model")
+    
     @torch.no_grad()
     def generate_reply(
         self,
@@ -198,6 +227,10 @@ class EmailResponseGenerator:
                 truncation=True,
                 max_length=1024
             )
+            
+            # Move inputs to the same device as the model
+            device = next(self.model.parameters()).device
+            inputs = inputs.to(device)
             
             outputs = self.model.generate(
                 inputs,
@@ -246,8 +279,11 @@ def main():
         # Train model
         trainer.train(dataset)
         
-        # Test generation
-        generator = EmailResponseGenerator(model_path='./fine_tuned_model')
+        # Test generation with quantized model
+        generator = EmailResponseGenerator(
+            model_path='./fine_tuned_model',
+            use_quantization=True  # Enable quantization
+        )
         test_input = "Can you help me with my account?"
         response = generator.generate_reply(test_input)
         logging.info(f"Test generation:\nInput: {test_input}\nResponse: {response}")
