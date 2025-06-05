@@ -1,8 +1,4 @@
-# 🚧 Work in Progress
 
-The final plan is to use a custom-tuned dataset with various email datasets to classify the kind of email, extract necessary information, and reply in the best way possible using agentic AI with LangGraph.
-
----
 
 # 📬 LangGraph Email Responder
 
@@ -12,6 +8,12 @@ A LangGraph-powered agentic AI system that generates automatic replies to emails
 - Extract intent and key information
 - Generate professional responses
 - Log everything for audit and improvement
+![Demo](assets/Demo.png)
+# 🚧 Work in Progress
+
+The final plan is to use a custom-tuned dataset with various email datasets to classify the kind of email, extract necessary information, and reply in the best way possible using agentic AI with LangGraph.
+
+---
 
 🔭 Coming Soon
 --------------
