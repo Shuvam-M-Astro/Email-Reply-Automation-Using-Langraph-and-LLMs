@@ -4,3 +4,5 @@ langgraph
 python-dotenv
 pyyaml
 streamlit
+pyperclip
+plotly
