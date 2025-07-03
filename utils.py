@@ -6,6 +6,84 @@ from collections import Counter
 import json
 import csv
 import os
+import time
+import random
+from typing import Callable, Any, Optional
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def retry_with_exponential_backoff(
+    func: Callable,
+    max_retries: int = 3,
+    base_delay: float = 1.0,
+    max_delay: float = 60.0,
+    backoff_factor: float = 2.0,
+    jitter: bool = True
+) -> Any:
+    """
+    Retry a function with exponential backoff strategy.
+    
+    Args:
+        func: The function to retry
+        max_retries: Maximum number of retry attempts
+        base_delay: Initial delay between retries in seconds
+        max_delay: Maximum delay between retries in seconds
+        backoff_factor: Multiplier for delay after each retry
+        jitter: Whether to add random jitter to delays
+    
+    Returns:
+        The result of the function call
+    
+    Raises:
+        Exception: The last exception encountered after all retries
+    """
+    last_exception = None
+    
+    for attempt in range(max_retries + 1):
+        try:
+            return func()
+        except Exception as e:
+            last_exception = e
+            logger.warning(f"Attempt {attempt + 1} failed: {str(e)}")
+            
+            if attempt == max_retries:
+                logger.error(f"All {max_retries + 1} attempts failed. Last error: {str(e)}")
+                raise last_exception
+            
+            # Calculate delay with exponential backoff
+            delay = min(base_delay * (backoff_factor ** attempt), max_delay)
+            
+            # Add jitter to prevent thundering herd
+            if jitter:
+                delay = delay * (0.5 + random.random() * 0.5)
+            
+            logger.info(f"Retrying in {delay:.2f} seconds...")
+            time.sleep(delay)
+    
+    raise last_exception
+
+def safe_api_call(func: Callable, *args, **kwargs) -> Any:
+    """
+    Safely execute an API call with retry logic and proper error handling.
+    
+    Args:
+        func: The API function to call
+        *args: Positional arguments for the function
+        **kwargs: Keyword arguments for the function
+    
+    Returns:
+        The result of the API call
+    
+    Raises:
+        Exception: If all retry attempts fail
+    """
+    def api_call():
+        return func(*args, **kwargs)
+    
+    return retry_with_exponential_backoff(api_call)
 
 def load_config(path="config.yaml"):
     with open(path, "r") as file:
