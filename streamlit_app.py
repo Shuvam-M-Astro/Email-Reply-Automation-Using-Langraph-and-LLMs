@@ -5,12 +5,25 @@ from csv_logger import log_to_csv
 from analytics_page import show_analytics_page
 from settings_page import show_settings_page
 from help_page import show_help_page
+from utils import load_config, safe_api_call
 import os
 import csv
 import json
 import pandas as pd
 from datetime import datetime
 import pyperclip
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Load configuration
+try:
+    config = load_config()
+except Exception as e:
+    st.error(f"Failed to load configuration: {e}")
+    st.stop()
 
 # Page configuration
 st.set_page_config(
@@ -153,6 +166,13 @@ if uploaded_file is not None:
         if st.button("🚀 Generate AI Reply", type="primary", use_container_width=True):
             with st.spinner("🤖 Generating intelligent reply..."):
                 try:
+                    # Check if API key is configured
+                    if not config.get("openai_api_key") or config["openai_api_key"] == "your-openai-api-key-here":
+                        st.error("❌ OpenAI API key not configured. Please set your API key in config.yaml")
+                        st.info("💡 Go to Settings page to configure your API key")
+                        st.stop()
+                    
+                    # Generate reply with retry logic
                     category, intent, entities, reply = generate_reply(email_data)
                     email_data.update({
                         "category": category,
@@ -161,7 +181,11 @@ if uploaded_file is not None:
                     })
                     
                     if auto_save:
-                        log_to_csv(email_data, reply)
+                        try:
+                            log_to_csv(email_data, reply)
+                        except Exception as e:
+                            logger.warning(f"Failed to save to CSV: {e}")
+                            st.warning("⚠️ Reply generated but failed to save to logs")
                     
                     # Display results
                     st.subheader("🤖 AI-Generated Reply")
@@ -221,8 +245,18 @@ if uploaded_file is not None:
                         st.success("✅ Reply generated successfully!")
                         
                 except Exception as e:
+                    logger.error(f"Error generating reply: {e}")
                     st.error(f"❌ Error generating reply: {str(e)}")
-                    st.exception(e)
+                    
+                    # Provide helpful error messages
+                    if "rate limit" in str(e).lower():
+                        st.info("💡 This error is due to API rate limiting. Please wait a moment and try again.")
+                    elif "authentication" in str(e).lower():
+                        st.info("💡 Please check your OpenAI API key in the Settings page.")
+                    elif "quota" in str(e).lower():
+                        st.info("💡 You've reached your OpenAI API quota. Please check your account.")
+                    else:
+                        st.info("💡 If this error persists, please check your internet connection and try again.")
     
     except Exception as e:
         st.error(f"❌ Error processing file: {str(e)}")
