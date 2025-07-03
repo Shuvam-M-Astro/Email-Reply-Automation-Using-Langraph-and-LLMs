@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnableLambda
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
-from utils import load_config
+from utils import load_config, safe_api_call
 import json
 
 # Load config
@@ -43,16 +43,26 @@ llm = ChatOpenAI(api_key=api_key, temperature=temperature)
 
 # Node 1: classify
 def classify_email(state: EmailState) -> EmailState:
-    result = llm.invoke(classification_prompt.format(email_body=state.email_body))
-    return EmailState(email_body=state.email_body, category=result.content.strip())
+    try:
+        result = safe_api_call(llm.invoke, classification_prompt.format(email_body=state.email_body))
+        return EmailState(email_body=state.email_body, category=result.content.strip())
+    except Exception as e:
+        # Fallback to a default category if classification fails
+        return EmailState(email_body=state.email_body, category="other")
 
 # Node 2: extract intent + entities
 def extract_entities_intent(state: EmailState) -> EmailState:
-    result = llm.invoke(extraction_prompt.format(email_body=state.email_body))
     try:
-        parsed = json.loads(result.content)
-    except Exception:
+        result = safe_api_call(llm.invoke, extraction_prompt.format(email_body=state.email_body))
+        try:
+            parsed = json.loads(result.content)
+        except json.JSONDecodeError:
+            # Fallback parsing if JSON is malformed
+            parsed = {"intent": "unknown", "entities": {}}
+    except Exception as e:
+        # Fallback values if API call fails
         parsed = {"intent": "unknown", "entities": {}}
+    
     return EmailState(
         email_body=state.email_body,
         category=state.category,
@@ -62,18 +72,24 @@ def extract_entities_intent(state: EmailState) -> EmailState:
 
 # Node 3: generate reply
 def generate_reply(state: EmailState) -> EmailState:
-    result = llm.invoke(reply_prompt.format(
-        email_body=state.email_body,
-        category=state.category,
-        intent=state.intent,
-        entities=state.entities
-    ))
+    try:
+        result = safe_api_call(llm.invoke, reply_prompt.format(
+            email_body=state.email_body,
+            category=state.category,
+            intent=state.intent,
+            entities=state.entities
+        ))
+        reply_content = result.content.strip()
+    except Exception as e:
+        # Fallback reply if generation fails
+        reply_content = f"I apologize, but I'm unable to generate a proper reply at the moment. Please contact support for assistance with your {state.category} inquiry."
+    
     return EmailState(
         email_body=state.email_body,
         category=state.category,
         intent=state.intent,
         entities=state.entities,
-        reply=result.content.strip()
+        reply=reply_content
     )
 
 # Build LangGraph
