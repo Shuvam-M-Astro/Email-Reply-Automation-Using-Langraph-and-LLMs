@@ -1,0 +1,29 @@
+# AI Email Reply Automation Configuration
+
+# OpenAI API Configuration
+openai_api_key: "your-openai-api-key-here"
+model_temperature: 0.3
+model_name: "gpt-3.5-turbo"
+
+# Application Settings
+max_retries: 3
+base_delay: 1.0
+max_delay: 60.0
+backoff_factor: 2.0
+
+# Logging Configuration
+log_level: "INFO"
+log_file: "logs/app.log"
+
+# File Paths
+log_directory: "logs"
+temp_directory: "temp"
+
+# UI Settings
+default_reply_tone: "Professional"
+default_reply_length: "Standard"
+auto_save_enabled: true
+
+# Analytics Settings
+enable_analytics: true
+data_retention_days: 90 
