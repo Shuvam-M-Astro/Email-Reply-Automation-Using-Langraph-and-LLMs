@@ -1,11 +1,15 @@
 import streamlit as st
-from email_parser import parse_email
-from reply_generator import generate_reply
-from csv_logger import log_to_csv
-from analytics_page import show_analytics_page
-from settings_page import show_settings_page
-from help_page import show_help_page
-from utils import load_config, safe_api_call
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+from src.core.email_processor import parse_email
+from src.core.reply_service import generate_reply
+from src.core.data_logger import log_to_csv
+from .analytics_dashboard import show_analytics_page
+from .settings_panel import show_settings_page
+from .help_system import show_help_page
+from src.utils.helpers import load_config, safe_api_call
 import os
 import csv
 import json

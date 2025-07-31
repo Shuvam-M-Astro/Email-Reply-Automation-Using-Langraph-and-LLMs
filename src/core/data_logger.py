@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 def log_to_csv(email_data, reply):
-    log_path = "logs/reply_log.csv"
+    log_path = "data/logs/reply_log.csv"
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
     file_exists = os.path.isfile(log_path)
 

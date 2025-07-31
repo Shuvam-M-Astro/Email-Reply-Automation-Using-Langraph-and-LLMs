@@ -1,4 +1,4 @@
-from graph_builder import build_email_graph
+from .langgraph_workflow import build_email_graph
 
 def generate_reply(email_data):
     graph = build_email_graph()

@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnableLambda
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
-from utils import load_config, safe_api_call
+from ..utils.helpers import load_config, safe_api_call
 import json
 
 # Load config
