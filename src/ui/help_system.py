@@ -173,8 +173,8 @@ John
         - **GPT-4-turbo**: Latest model with improved performance
         
         ### Configuration Files
-        - **config.yaml**: Main configuration file
-        - **logs/reply_log.csv**: Reply history and analytics data
+        - **config/app_config.yaml**: Main configuration file
+        - **data/logs/reply_log.csv**: Reply history and analytics data
         
         ### Dependencies
         - **Streamlit**: Web interface framework
