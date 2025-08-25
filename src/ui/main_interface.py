@@ -94,7 +94,7 @@ with st.sidebar:
     
     # Statistics
     st.header("📊 Statistics")
-    log_path = "logs/reply_log.csv"
+    log_path = "data/logs/reply_log.csv"
     if os.path.exists(log_path):
         try:
             with open(log_path, "r", encoding="utf-8") as f:
@@ -172,7 +172,7 @@ if uploaded_file is not None:
                 try:
                     # Check if API key is configured
                     if not config.get("openai_api_key") or config["openai_api_key"] == "your-openai-api-key-here":
-                        st.error("❌ OpenAI API key not configured. Please set your API key in config.yaml")
+                        st.error("❌ OpenAI API key not configured. Please set your API key in config/app_config.yaml")
                         st.info("💡 Go to Settings page to configure your API key")
                         st.stop()
                     
