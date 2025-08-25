@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
-from utils import (
-    load_reply_data, 
-    create_category_chart, 
-    create_timeline_chart, 
+from src.utils.helpers import (
+    load_reply_data,
+    create_category_chart,
+    create_timeline_chart,
     create_intent_chart,
     get_reply_statistics,
-    analyze_reply_quality
+    analyze_reply_quality,
 )
 import plotly.express as px
 from datetime import datetime, timedelta
