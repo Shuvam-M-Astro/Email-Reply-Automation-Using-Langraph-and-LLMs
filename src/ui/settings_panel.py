@@ -10,7 +10,7 @@ def show_settings_page():
     st.markdown('<h1 class="main-header">⚙️ Settings</h1>', unsafe_allow_html=True)
     
     # Configuration file path
-    config_file = "config.yaml"
+    config_file = "config/app_config.yaml"
     
     # Load existing config or create default
     if os.path.exists(config_file):
