@@ -85,11 +85,11 @@ def safe_api_call(func: Callable, *args, **kwargs) -> Any:
     
     return retry_with_exponential_backoff(api_call)
 
-def load_config(path="config.yaml"):
+def load_config(path="config/app_config.yaml"):
     with open(path, "r") as file:
         return yaml.safe_load(file)
 
-def load_reply_data(log_path="logs/reply_log.csv"):
+def load_reply_data(log_path="data/logs/reply_log.csv"):
     """
     Load and parse reply log data
     """
