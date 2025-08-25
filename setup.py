@@ -20,7 +20,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/your-username/langgraph-email-reply-automation",
-    packages=find_packages(),
+    packages=find_packages("src"),
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
